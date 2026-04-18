@@ -1,22 +1,22 @@
 # SpaceShip-war
 
-2D Peer-to-Peer Sci-Fi Battleship game built with C# WPF, where classic naval ships are replaced by futuristic space fleets using pixel-art assets.
+Trò chơi chiến thuật theo lượt 2D kiểu Sci-Fi Battleship xây dựng bằng C# WPF, trong đó tàu chiến hải quân truyền thống được thay bằng hạm đội không gian dùng pixel-art.
 
-## 1. Gioi thieu de tai
+## 1. Giới thiệu đề tài
 
-Day la do an game chien thuat theo luot tren luoi 10x10, su dung mo hinh P2P (Peer-to-Peer) thay vi dedicated server.
+Đây là đồ án game chiến thuật theo lượt trên lưới 10x10, sử dụng mô hình P2P (Peer-to-Peer) thay vì dedicated server.
 
-- Mot instance dong vai tro Host va cho ket noi qua TCP.
-- Mot instance dong vai tro Client va ket noi den Host.
-- Client co the tu dong tim Host trong LAN thong qua UDP Broadcast Discovery.
+- Một instance đóng vai trò Host và chờ kết nối qua TCP.
+- Một instance đóng vai trò Client và kết nối đến Host.
+- Client có thể tự động tìm Host trong LAN thông qua UDP Broadcast Discovery.
 
-Muc tieu chinh cua de tai:
+Mục tiêu chính của đề tài:
 
-1. Xay dung he thong networking bat dong bo on dinh cho game turn-based.
-2. Dam bao UI WPF luon responsive khi ket noi, doi doi thu, gui nhan nuoc di.
-3. Chia tach kien truc OOP ro rang de de mo rong, de test va de bao ve do an.
+1. Xây dựng hệ thống networking bất đồng bộ ổn định cho game turn-based.
+2. Đảm bảo UI WPF luôn responsive khi kết nối, đợi đối thủ, gửi nhận nước đi.
+3. Chia tách kiến trúc OOP rõ ràng để dễ mở rộng, dễ test và dễ bảo vệ đồ án.
 
-## 2. Cong nghe su dung
+## 2. Công nghệ sử dụng
 
 - C# (.NET) + WPF
 - TCP (gameplay messages)
@@ -24,16 +24,16 @@ Muc tieu chinh cua de tai:
 - async/await, Task, CancellationToken, SemaphoreSlim
 - MVVM (ViewModel + Command)
 
-## 3. Kien truc tong the
+## 3. Kiến trúc tổng thể
 
-Project duoc tach thanh cac tang ro rang:
+Project được tách thành các tầng rõ ràng:
 
 1. Presentation layer
-- ViewModel, Commands, binding status/command cho WPF UI.
+- ViewModel, Commands, binding trạng thái và thao tác cho WPF UI.
 
 2. Application/Game Session layer
-- Dieu phoi phase tran dau: Placement -> AwaitingReady -> Combat -> Finished.
-- Quan ly turn va xu ly message READY/FIRE/RESULT/END.
+- Điều phối phase trận đấu: Placement -> AwaitingReady -> Combat -> Finished.
+- Quản lý lượt chơi và xử lý message READY/FIRE/RESULT/END.
 
 3. Networking Infrastructure layer
 - TCP connection manager, retry/timeout/reconnect policy.
@@ -41,9 +41,9 @@ Project duoc tach thanh cac tang ro rang:
 - Protocol parser/serializer cho message text.
 
 4. Domain/Board adapter layer
-- Xu ly board 10x10, hit/miss/sunk, enemy shadow board.
+- Xử lý board 10x10, hit/miss/sunk, enemy shadow board.
 
-## 4. Cau truc thu muc
+## 4. Cấu trúc thư mục
 
 ```text
 SpaceShip-war/
@@ -80,74 +80,74 @@ SpaceShip-war/
 
 ## 5. Protocol message (TCP)
 
-Message theo dang text, moi message la mot dong:
+Message theo dạng text, mỗi message là một dòng:
 
 - READY|1
 - FIRE|x|y
 - RESULT|x|y|MISS/HIT/SUNK
 - END|WIN/LOSE
 
-Ly do chon text protocol:
+Lý do chọn text protocol:
 
-1. De debug trong giai doan phat trien/do an.
-2. De mo rong nhanh command moi.
-3. De giai thich ro trong van dap.
+1. Dễ debug trong giai đoạn phát triển/đồ án.
+2. Dễ mở rộng nhanh command mới.
+3. Dễ giải thích rõ trong vấn đáp.
 
-## 6. Luong hoat dong chuong trinh
+## 6. Luồng hoạt động chương trình
 
-1. Host mo TCP listener va (tuy chon) bat dau UDP announcement.
-2. Client lang nghe discovery de tim host trong LAN hoac nhap IP thu cong.
-3. Client ket noi TCP den Host (co retry + timeout).
-4. Hai ben xac nhan READY.
+1. Host mở TCP listener và (tùy chọn) bắt đầu UDP announcement.
+2. Client lắng nghe discovery để tìm host trong LAN hoặc nhập IP thủ công.
+3. Client kết nối TCP đến Host (có retry + timeout).
+4. Hai bên xác nhận READY.
 5. Vao combat turn-based:
-- Ben den luot gui FIRE.
-- Ben nhan tinh ket qua board local va gui RESULT.
-- Ben gui cap nhat enemy shadow board, doi luot.
-6. Khi ket thuc tran, gui END va dua session sang Finished.
+- Bên đến lượt gửi FIRE.
+- Bên nhận tính kết quả board local và gửi RESULT.
+- Bên gửi cập nhật enemy shadow board, đổi lượt.
+6. Khi kết thúc trận, gửi END và đưa session sang Finished.
 
-## 7. Tinh nang networking da co
+## 7. Tính năng networking đã có
 
-- Async hoan toan cho connect, send, receive.
-- UI-safe events qua Dispatcher (khong update control tu worker thread).
-- Retry connect voi backoff.
-- Timeout cho connect va send.
-- Auto reconnect cho client khi mat ket noi ngoai y muon.
-- Event thong bao tien trinh reconnect de hien thi tren UI.
+- Async hoàn toàn cho connect, send, receive.
+- UI-safe events qua Dispatcher (không update control từ worker thread).
+- Retry connect với backoff.
+- Timeout cho connect và send.
+- Auto reconnect cho client khi mất kết nối ngoài ý muốn.
+- Event thông báo tiến trình reconnect để hiển thị trên UI.
 
-## 8. Huong dan chay demo (2 may trong cung LAN)
+## 8. Hướng dẫn chạy demo (2 máy trong cùng LAN)
 
-1. May A (Host):
+1. Máy A (Host):
 - Start Host
 - Start Announce
-- Ready sau khi dat doi hinh
+- Ready sau khi đặt đội hình
 
-2. May B (Client):
+2. Máy B (Client):
 - Listen Discovery
-- Chon host tim duoc (hoac nhap IP)
+- Chọn host tìm được (hoặc nhập IP)
 - Connect
 - Ready
 
 3. Combat:
-- Den luot thi ban vao toa do doi thu
-- Theo doi status va event log tren UI
+- Đến lượt thì bắn vào tọa độ đối thủ
+- Theo dõi status và event log trên UI
 
-## 9. Trang thai hien tai cua repository
+## 9. Trạng thái hiện tại của repository
 
-Repository hien chua source modules theo kien truc OOP va XAML/ViewModel mau cho networking flow.
-Neu ban muon chay thanh executable day du, hay tich hop cac module trong solution WPF chinh cua ban (MainWindow/App startup) va map board UI theo gameplay logic.
+Repository hiện chứa source modules theo kiến trúc OOP và XAML/ViewModel mẫu cho networking flow.
+Nếu bạn muốn chạy thành executable đầy đủ, hãy tích hợp các module trong solution WPF chính của bạn (MainWindow/App startup) và map board UI theo gameplay logic.
 
-## 10. Dinh huong mo rong
+## 10. Định hướng mở rộng
 
-1. Them board UI interactive 10x10 (drag/drop fleet placement).
-2. Them save/load state va reconnect resume game.
-3. Them unit test cho protocol parser va session coordinator.
-4. Them security layer (validation/chong packet gia).
+1. Thêm board UI interactive 10x10 (drag/drop fleet placement).
+2. Thêm save/load state và reconnect resume game.
+3. Thêm unit test cho protocol parser và session coordinator.
+4. Thêm security layer (validation/chống packet giả).
 
-## 11. Tac gia va muc dich
+## 11. Tác giả và mục đích
 
-Du an phuc vu hoc tap va trinh bay nang luc:
+Dự án phục vụ học tập và trình bày năng lực:
 
-- Kien truc phan tang OOP
+- Kiến trúc phân tầng OOP
 - Network programming trong C#
-- Xu ly bat dong bo va dong bo UI WPF
-- Thiet ke game turn-based P2P
+- Xử lý bất đồng bộ và đồng bộ UI WPF
+- Thiết kế game turn-based P2P
