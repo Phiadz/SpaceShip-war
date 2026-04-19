@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 
 namespace Battleship2D.Presentation.ViewModels;
 
@@ -31,6 +32,15 @@ public abstract class ObservableObject : INotifyPropertyChanged
     /// </summary>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        var args = new PropertyChangedEventArgs(propertyName);
+        var dispatcher = Application.Current?.Dispatcher;
+
+        if (dispatcher is null || dispatcher.CheckAccess())
+        {
+            PropertyChanged?.Invoke(this, args);
+            return;
+        }
+
+        _ = dispatcher.InvokeAsync(() => PropertyChanged?.Invoke(this, args));
     }
 }

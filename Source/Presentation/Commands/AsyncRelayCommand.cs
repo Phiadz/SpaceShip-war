@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Battleship2D.Presentation.Commands;
@@ -44,7 +45,17 @@ public sealed class AsyncRelayCommand : ICommand
 
         try
         {
-            await _executeAsync().ConfigureAwait(false);
+            await _executeAsync();
+        }
+        catch (Exception ex)
+        {
+            // Guard against process termination from async-void command exceptions.
+            _ = Application.Current?.Dispatcher.InvokeAsync(() =>
+                MessageBox.Show(
+                    $"Lenh thuc thi bi loi: {ex.Message}",
+                    "SpaceShip War - Command Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning));
         }
         finally
         {
@@ -56,5 +67,15 @@ public sealed class AsyncRelayCommand : ICommand
     /// <summary>
     /// Buoc WPF reevaluate CanExecute de cap nhat trang thai control.
     /// </summary>
-    public void NotifyCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    public void NotifyCanExecuteChanged()
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        _ = dispatcher.InvokeAsync(() => CanExecuteChanged?.Invoke(this, EventArgs.Empty));
+    }
 }
