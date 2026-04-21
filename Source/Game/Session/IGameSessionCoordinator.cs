@@ -22,6 +22,7 @@ public interface IGameSessionCoordinator : IAsyncDisposable
     bool IsRemoteReady { get; }
     bool IsLocalTurn { get; }
 
+    Task ResetSessionAsync(CancellationToken cancellationToken = default);
     Task ConfirmReadyAsync(CancellationToken cancellationToken = default);
     Task FireAsync(int x, int y, CancellationToken cancellationToken = default);
     Task EndGameAsync(bool isWinner, CancellationToken cancellationToken = default);

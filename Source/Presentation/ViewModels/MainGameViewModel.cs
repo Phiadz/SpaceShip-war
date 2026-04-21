@@ -430,6 +430,7 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     {
         await RunBusyAsync(async () =>
         {
+            await PrepareFreshMatchStateAsync();
             LastEvent = "Host listening...";
             await _networkManager.StartHostAsync(HostPort);
         });
@@ -439,6 +440,7 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     {
         await RunBusyAsync(async () =>
         {
+            await PrepareFreshMatchStateAsync();
             LastEvent = $"Connecting to {HostIp}:{HostPort}...";
             await _networkManager.ConnectToHostAsync(HostIp, HostPort);
         });
@@ -504,8 +506,38 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
         {
             await _discoveryService.StopAsync();
             await _networkManager.StopAsync();
-            LastEvent = "All services stopped.";
+            await PrepareFreshMatchStateAsync();
+            LastEvent = "All services stopped. Session reset for a new match.";
         });
+    }
+
+    private async Task PrepareFreshMatchStateAsync()
+    {
+        await _sessionCoordinator.ResetSessionAsync();
+        _combatAdapter.ResetForNewMatch();
+        ResetBoardsForNewMatch();
+        ResetPlacement();
+
+        GameResult = "In Progress";
+        SessionStatus = SessionPhase.Placement.ToString();
+        TurnHint = "Placement phase: choose ship, rotate, then click local board.";
+        IsMyTurn = false;
+    }
+
+    private void ResetBoardsForNewMatch()
+    {
+        foreach (var cell in LocalBoardCells)
+        {
+            cell.SetLocalShipPresent(false);
+            cell.SetClickable(false);
+        }
+
+        foreach (var cell in EnemyBoardCells)
+        {
+            // Dung lai API reset mau/marker de xoa dau vet hit/miss cua tran cu.
+            cell.SetLocalShipPresent(false);
+            cell.SetEnemyClickable(false);
+        }
     }
 
     private async Task RunBusyAsync(Func<Task> action)

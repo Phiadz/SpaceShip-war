@@ -124,6 +124,16 @@ public sealed class SampleGameCombatStateAdapter : IGameCombatStateAdapter
     }
 
     /// <summary>
+    /// Reset cac dau vet tran cu (dan da ban, ket qua board doi thu).
+    /// Dung khi bat dau tran moi sau Stop All/Host lai/Connect lai.
+    /// </summary>
+    public void ResetForNewMatch()
+    {
+        _incomingShots.Clear();
+        _enemyBoardResults.Clear();
+    }
+
+    /// <summary>
     /// Tra ve true neu moi o cua tat ca tau local deu da trung dan.
     /// </summary>
     public bool AreAllLocalShipsDestroyed()

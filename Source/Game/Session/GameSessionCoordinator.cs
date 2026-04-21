@@ -36,6 +36,7 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
         _dispatcher = dispatcher ?? Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
 
         _networkManager.MessageReceived += OnNetworkMessageReceived;
+        _networkManager.ConnectionStateChanged += OnNetworkConnectionStateChanged;
     }
 
     public event EventHandler<SessionPhaseChangedEventArgs>? PhaseChanged;
@@ -48,6 +49,28 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
     public bool IsLocalReady { get; private set; }
     public bool IsRemoteReady { get; private set; }
     public bool IsLocalTurn { get; private set; }
+
+    /// <summary>
+    /// Dua session ve trang thai san sang cho tran moi (Placement, chua Ready, chua den luot ai).
+    /// Ham nay khong dong/mo ket noi mang, chi reset state phien trong coordinator.
+    /// </summary>
+    public async Task ResetSessionAsync(CancellationToken cancellationToken = default)
+    {
+        await _stateLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            IsLocalReady = false;
+            IsRemoteReady = false;
+            IsLocalTurn = false;
+            _awaitingShotResult = false;
+            SetPhaseNoLock(SessionPhase.Placement);
+            RaiseTurnChanged(false);
+        }
+        finally
+        {
+            _stateLock.Release();
+        }
+    }
 
     /// <summary>
     /// Local player xac nhan da dat doi hinh xong.
@@ -146,6 +169,23 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
         catch
         {
             // Loi parse hoac state da duoc bo qua de session khong bi sap vi 1 packet loi.
+        }
+    }
+
+    private async void OnNetworkConnectionStateChanged(object? sender, Networking.Events.ConnectionStateChangedEventArgs e)
+    {
+        if (e.State != ConnectionState.Disconnected)
+        {
+            return;
+        }
+
+        try
+        {
+            await ResetSessionAsync().ConfigureAwait(false);
+        }
+        catch
+        {
+            // Bo qua loi reset de khong anh huong qua trinh dong ket noi.
         }
     }
 
@@ -428,6 +468,7 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
     public ValueTask DisposeAsync()
     {
         _networkManager.MessageReceived -= OnNetworkMessageReceived;
+        _networkManager.ConnectionStateChanged -= OnNetworkConnectionStateChanged;
         _stateLock.Dispose();
         return ValueTask.CompletedTask;
     }
