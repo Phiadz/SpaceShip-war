@@ -74,6 +74,69 @@ public sealed class SampleGameCombatStateAdapter : IGameCombatStateAdapter
     }
 
     /// <summary>
+    /// Kiem tra mot o co phai vi tri tau local khong.
+    /// UI dung ham nay de ve doi hinh khoi tao tren local board.
+    /// </summary>
+    public bool IsLocalShipCell(int x, int y)
+    {
+        ValidateCoordinate(x, y);
+        var cell = (x, y);
+        return _localShips.Any(ship => ship.Contains(cell));
+    }
+
+    /// <summary>
+    /// Ap dung doi hinh dat tau tu placement phase thay cho layout mac dinh.
+    /// </summary>
+    public void ApplyCustomFleet(IEnumerable<IReadOnlyCollection<(int X, int Y)>> ships)
+    {
+        if (ships is null)
+        {
+            throw new ArgumentNullException(nameof(ships));
+        }
+
+        var normalizedShips = ships
+            .Select(s => new HashSet<(int X, int Y)>(s))
+            .Where(s => s.Count > 0)
+            .ToList();
+
+        if (normalizedShips.Count == 0)
+        {
+            throw new InvalidOperationException("Custom fleet cannot be empty.");
+        }
+
+        var occupied = new HashSet<(int X, int Y)>();
+        foreach (var ship in normalizedShips)
+        {
+            foreach (var cell in ship)
+            {
+                ValidateCoordinate(cell.X, cell.Y);
+                if (!occupied.Add(cell))
+                {
+                    throw new InvalidOperationException("Custom fleet has overlapping cells.");
+                }
+            }
+        }
+
+        _localShips.Clear();
+        _localShips.AddRange(normalizedShips);
+        _incomingShots.Clear();
+        _enemyBoardResults.Clear();
+    }
+
+    /// <summary>
+    /// Tra ve true neu moi o cua tat ca tau local deu da trung dan.
+    /// </summary>
+    public bool AreAllLocalShipsDestroyed()
+    {
+        if (_localShips.Count == 0)
+        {
+            return false;
+        }
+
+        return _localShips.All(ship => ship.All(cell => _incomingShots.Contains(cell)));
+    }
+
+    /// <summary>
     /// Dat fleet mac dinh theo bo 5-4-3-3-2 de de test nhanh.
     /// Khong random de hai may test ra ket qua giong nhau, de debug.
     /// </summary>

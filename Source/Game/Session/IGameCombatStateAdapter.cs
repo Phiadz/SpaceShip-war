@@ -19,4 +19,9 @@ public interface IGameCombatStateAdapter
     /// Ap ket qua phat ban cua local player len board doi thu (ban sao local).
     /// </summary>
     Task ApplyOutgoingShotResultAsync(int x, int y, ShotOutcome outcome, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Kiem tra tat ca tau local da bi pha huy het chua.
+    /// </summary>
+    bool AreAllLocalShipsDestroyed();
 }

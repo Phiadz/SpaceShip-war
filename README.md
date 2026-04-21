@@ -134,26 +134,7 @@ Lý do chọn text protocol:
 ## 9. Trạng thái hiện tại của repository
 
 Repository hiện chứa source modules theo kiến trúc OOP và XAML/ViewModel mẫu cho networking flow.
-
-Lưu ý quan trọng cho người mới:
-
-1. Repo này hiện chưa có project WPF hoàn chỉnh để bấm Run ngay.
-2. Vì vậy bạn chưa thấy các file khởi động giao diện như file startup của WPF.
-3. Phần Source đang là các module logic đã tách sẵn để cắm vào app WPF.
-
-Để chạy thành executable đầy đủ, bạn làm theo thứ tự:
-
-1. Tạo một project WPF mới trong solution.
-2. Dùng ViewModel mẫu có sẵn tại Source/Presentation để làm lớp điều khiển UI.
-3. Dùng layout mẫu tại Source/Presentation để dựng cửa sổ giao diện.
-4. Nối các nút UI với command trong ViewModel (Host, Connect, Ready, Fire).
-5. Tạo lưới 10x10 và bind click của từng ô với hành động bắn tương ứng.
-
-Map board UI theo gameplay logic có nghĩa là:
-
-1. UI chỉ hiển thị trạng thái ô cờ và nhận thao tác click.
-2. Logic trúng/trượt/chìm vẫn xử lý ở các lớp Game và Networking.
-3. Khi lớp logic phát event, UI nhận event và tô màu lại ô tương ứng.
+Nếu bạn muốn chạy thành executable đầy đủ, hãy tích hợp các module trong solution WPF chính của bạn (MainWindow/App startup) và map board UI theo gameplay logic.
 
 ## 10. Định hướng mở rộng
 

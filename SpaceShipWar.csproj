@@ -10,5 +10,8 @@
   <ItemGroup>
     <Page Remove="Source/Presentation/MainWindow.Sample.xaml" />
     <None Include="Source/Presentation/MainWindow.Sample.xaml" />
+    <None Include="Assets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

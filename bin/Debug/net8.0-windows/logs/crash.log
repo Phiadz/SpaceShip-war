@@ -70,3 +70,75 @@ Error  : A Task's exception(s) were not observed either by Waiting on the Task o
 Stack  :
 <no stack trace>
 
+========================================
+Time   : 2026-04-21 12:47:08.835 +07:00
+Source : TaskSchedulerUnobservedTaskException
+Type   : System.AggregateException
+Error  : A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Unable to read data from the transport connection: The I/O operation has been aborted because of either a thread exit or an application request..)
+Stack  :
+<no stack trace>
+
+========================================
+Time   : 2026-04-21 13:10:36.320 +07:00
+Source : TaskSchedulerUnobservedTaskException
+Type   : System.AggregateException
+Error  : A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (The I/O operation has been aborted because of either a thread exit or an application request.)
+Stack  :
+<no stack trace>
+
+========================================
+Time   : 2026-04-21 13:35:48.739 +07:00
+Source : DispatcherUnhandledException
+Type   : System.Windows.Markup.XamlParseException
+Error  : 'Provide value on 'System.Windows.Baml2006.TypeConverterMarkupExtension' threw an exception.' Line number '10' and line position '14'.
+Stack  :
+   at System.Windows.Markup.XamlReader.RewrapException(Exception e, IXamlLineInfo lineInfo, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.Load(XamlReader xamlReader, IXamlObjectWriterFactory writerFactory, Boolean skipJournaledProperties, Object rootObject, XamlObjectWriterSettings settings, Uri baseUri)
+   at System.Windows.Markup.WpfXamlLoader.LoadBaml(XamlReader xamlReader, Boolean skipJournaledProperties, Object rootObject, XamlAccessLevel accessLevel, Uri baseUri)
+   at System.Windows.Markup.XamlReader.LoadBaml(Stream stream, ParserContext parserContext, Object parent, Boolean closeStream)
+   at System.Windows.Application.LoadBamlStreamWithSyncInfo(Stream stream, ParserContext pc)
+   at System.Windows.Application.DoStartup()
+   at System.Windows.Application.<.ctor>b__1_0(Object unused)
+   at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)
+   at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)
+
+========================================
+Time   : 2026-04-21 13:39:36.253 +07:00
+Source : TaskSchedulerUnobservedTaskException
+Type   : System.AggregateException
+Error  : A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Unable to read data from the transport connection: The I/O operation has been aborted because of either a thread exit or an application request..)
+Stack  :
+<no stack trace>
+
+========================================
+Time   : 2026-04-21 13:39:36.515 +07:00
+Source : TaskSchedulerUnobservedTaskException
+Type   : System.AggregateException
+Error  : A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Unable to read data from the transport connection: The I/O operation has been aborted because of either a thread exit or an application request..)
+Stack  :
+<no stack trace>
+
+========================================
+Time   : 2026-04-21 13:42:06.537 +07:00
+Source : TaskSchedulerUnobservedTaskException
+Type   : System.AggregateException
+Error  : A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Unable to read data from the transport connection: The I/O operation has been aborted because of either a thread exit or an application request..)
+Stack  :
+<no stack trace>
+
+========================================
+Time   : 2026-04-21 13:48:13.955 +07:00
+Source : TaskSchedulerUnobservedTaskException
+Type   : System.AggregateException
+Error  : A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Unable to read data from the transport connection: The I/O operation has been aborted because of either a thread exit or an application request..)
+Stack  :
+<no stack trace>
+
+========================================
+Time   : 2026-04-21 13:48:30.289 +07:00
+Source : TaskSchedulerUnobservedTaskException
+Type   : System.AggregateException
+Error  : A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Unable to read data from the transport connection: The I/O operation has been aborted because of either a thread exit or an application request..)
+Stack  :
+<no stack trace>
+

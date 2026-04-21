@@ -15,6 +15,7 @@ public interface IGameSessionCoordinator : IAsyncDisposable
     event EventHandler<TurnChangedEventArgs>? TurnChanged;
     event EventHandler<ShotResolvedEventArgs>? IncomingShotResolved;
     event EventHandler<ShotResolvedEventArgs>? OutgoingShotResolved;
+    event EventHandler<GameEndedEventArgs>? GameEnded;
 
     SessionPhase Phase { get; }
     bool IsLocalReady { get; }

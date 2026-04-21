@@ -47,3 +47,18 @@ public sealed class ShotResolvedEventArgs : EventArgs
     public int Y { get; }
     public ShotOutcome Outcome { get; }
 }
+
+/// <summary>
+/// Su kien ket thuc tran dau de UI biet ben nao thang.
+/// </summary>
+public sealed class GameEndedEventArgs : EventArgs
+{
+    public GameEndedEventArgs(bool isLocalWinner, string reason)
+    {
+        IsLocalWinner = isLocalWinner;
+        Reason = reason;
+    }
+
+    public bool IsLocalWinner { get; }
+    public string Reason { get; }
+}

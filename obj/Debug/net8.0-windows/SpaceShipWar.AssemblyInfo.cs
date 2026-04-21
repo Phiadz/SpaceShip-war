@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SpaceShipWar")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af456429282dfa11b17c0930ad2d8859d5c3cfa6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+13fcdea6c0ba534fcd49c57485aeec12f6265df9")]
 [assembly: System.Reflection.AssemblyProductAttribute("SpaceShipWar")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SpaceShipWar")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

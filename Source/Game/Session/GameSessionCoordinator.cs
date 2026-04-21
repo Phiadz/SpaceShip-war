@@ -42,6 +42,7 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
     public event EventHandler<TurnChangedEventArgs>? TurnChanged;
     public event EventHandler<ShotResolvedEventArgs>? IncomingShotResolved;
     public event EventHandler<ShotResolvedEventArgs>? OutgoingShotResolved;
+    public event EventHandler<GameEndedEventArgs>? GameEnded;
 
     public SessionPhase Phase { get; private set; } = SessionPhase.Placement;
     public bool IsLocalReady { get; private set; }
@@ -124,6 +125,7 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
             _awaitingShotResult = false;
             SetPhaseNoLock(SessionPhase.Finished);
             RaiseTurnChanged(false);
+            RaiseGameEnded(isWinner, "Local game end triggered.");
         }
         finally
         {
@@ -173,7 +175,7 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
                 break;
 
             case GameMessageType.End:
-                await HandleEndAsync().ConfigureAwait(false);
+                await HandleEndAsync(message).ConfigureAwait(false);
                 break;
 
             default:
@@ -247,6 +249,12 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
         var resultMessage = _protocol.BuildResult(message.X.Value, message.Y.Value, outcome);
         await _networkManager.SendMessageAsync(resultMessage).ConfigureAwait(false);
 
+        if (_combatAdapter.AreAllLocalShipsDestroyed())
+        {
+            await EndGameAsync(isWinner: false).ConfigureAwait(false);
+            return;
+        }
+
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
@@ -294,8 +302,11 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
     /// <summary>
     /// Xu ly thong diep END den tu peer, dong phien ve Finished.
     /// </summary>
-    private async Task HandleEndAsync()
+    private async Task HandleEndAsync(GameMessage message)
     {
+        var remoteWinner = message.Winner ?? false;
+        var localWinner = !remoteWinner;
+
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
@@ -303,6 +314,7 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
             IsLocalTurn = false;
             SetPhaseNoLock(SessionPhase.Finished);
             RaiseTurnChanged(false);
+            RaiseGameEnded(localWinner, "Remote peer ended the game.");
         }
         finally
         {
@@ -385,6 +397,15 @@ public sealed class GameSessionCoordinator : IGameSessionCoordinator
     {
         var args = new ShotResolvedEventArgs(x, y, outcome);
         PostToUiThread(() => OutgoingShotResolved?.Invoke(this, args));
+    }
+
+    /// <summary>
+    /// Phat su kien ket thuc tran dau tren UI thread.
+    /// </summary>
+    private void RaiseGameEnded(bool isLocalWinner, string reason)
+    {
+        var args = new GameEndedEventArgs(isLocalWinner, reason);
+        PostToUiThread(() => GameEnded?.Invoke(this, args));
     }
 
     /// <summary>
