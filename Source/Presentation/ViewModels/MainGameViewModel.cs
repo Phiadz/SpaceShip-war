@@ -35,12 +35,12 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     //   Vi du: Assets/space_breaker_asset/Ships/Small/body_01.png
     private static readonly (string Name, int? PlacementLength, string[] AssetPathParts)[] ShipCatalog =
     {
-        ("Carrier", 5, new[] { AssetsRoot, AssetPackFolder, ShipsFolder, "Big", "body_03.png" }),
-        ("Destroyer", 4, new[] { AssetsRoot, AssetPackFolder, ShipsFolder, "Medium", "body_02.png" }),
+        ("Carrier", 4, new[] { AssetsRoot, AssetPackFolder, ShipsFolder, "Big", "body_03.png" }),
+        ("Destroyer", 3, new[] { AssetsRoot, AssetPackFolder, ShipsFolder, "Medium", "body_02.png" }),
         ("Cruiser", 3, new[] { AssetsRoot, AssetPackFolder, ShipsFolder, "Medium", "body_03.png" }),
-        ("Frigate", 3, new[] { AssetsRoot, AssetPackFolder, ShipsFolder, "Small", "body_02.png" }),
+        ("Frigate", 2, new[] { AssetsRoot, AssetPackFolder, ShipsFolder, "Small", "body_02.png" }),
         ("Scout", 2, new[] { AssetsRoot, AssetPackFolder, ShipsFolder, "Small", "body_01.png" }),
-        ("Battleship", 5, new[] { AssetsRoot, AssetPackFolder, ShipsFolder, "Big", "body_02.png" })
+        ("Battleship", 4, new[] { AssetsRoot, AssetPackFolder, ShipsFolder, "Big", "body_02.png" })
     };
 
     private readonly INetworkManager _networkManager;
@@ -282,7 +282,10 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
 
     private bool CanEditPlacement()
     {
-        return !_isBusy && _sessionCoordinator.Phase == SessionPhase.Placement && !_sessionCoordinator.IsLocalReady;
+        // Cho phép đặt tàu ở cả 2 Phase, miễn là bản thân client này chưa bấm Ready
+        return !_isBusy && 
+               !_sessionCoordinator.IsLocalReady && 
+               (_sessionCoordinator.Phase == SessionPhase.Placement || _sessionCoordinator.Phase == SessionPhase.AwaitingReady);
     }
 
     private void BuildBoards()
@@ -389,25 +392,59 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
         var shipImagePath = TryGetShipAssetPath(shipName);
         var shipSet = new HashSet<(int X, int Y)>(candidateCells);
         _placedShips.Add(shipSet);
-        foreach (var pos in shipSet)
+            foreach (var pos in shipSet)
         {
             _placedShipNameByCell[pos] = shipName;
             LocalBoardCells.First(c => c.X == pos.X && c.Y == pos.Y).SetLocalShipPresent(true, shipImagePath);
         }
-        double cellTotalSize = 32.0; 
-    double shipWidth = 30.0;
-    double shipHeight = (SelectedPlacementShip.Length * cellTotalSize) - 2.0;
 
-    VisualPlacedShips.Add(new VisualPlacedShipViewModel
-    {
-        ImagePath = shipImagePath!,
-        Left = startX * cellTotalSize + 1.0, 
-        Top = startY * cellTotalSize + 1.0,
-        Width = shipWidth,
-        Height = shipHeight,
-        // Hình tàu mặc định hướng lên (0 độ). Nếu đặt ngang, xoay 90 độ.
-        Rotation = IsPlacementHorizontal ? 90.0 : 0.0 
-    });
+            // --- TÍNH TOÁN PIXEL VỚI TỶ LỆ RIÊNG CHO TỪNG SIZE TÀU ---
+        double cellTotalSize = 42.0; 
+        
+        // Tùy chỉnh hệ số phình to (Width Multiplier) dựa trên độ dài tàu
+        double widthMultiplier;
+        if (SelectedPlacementShip.Length == 4) 
+        {
+            // Tàu Big (Carrier, Battleship - 5 ô): Cần bè ra nhiều nhất để không bị bóp méo
+            widthMultiplier = 2.0; 
+        }
+        else if (SelectedPlacementShip.Length == 3) 
+        {
+            // Tàu Medium (Destroyer, Cruiser, Frigate - 3 đến 4 ô): Phình ra vừa phải
+            widthMultiplier = 1.3; 
+        }
+        else 
+        {
+            // Tàu Small (Scout - 2 ô): Vừa khít, không cần phình ra thêm
+            widthMultiplier = 1.0; 
+        }
+
+        double boundingBoxWidth = cellTotalSize * widthMultiplier; 
+        double boundingBoxHeight = (SelectedPlacementShip.Length * cellTotalSize) - 4.0;
+
+        double centerOffset = (boundingBoxWidth - cellTotalSize) / 2.0;
+
+        double leftPos = startX * cellTotalSize + 2.0;
+        double topPos = startY * cellTotalSize + 2.0;
+
+        if (IsPlacementHorizontal)
+        {
+            topPos -= centerOffset; 
+        }
+        else
+        {
+            leftPos -= centerOffset;
+        }
+
+        VisualPlacedShips.Add(new VisualPlacedShipViewModel
+        {
+            ImagePath = shipImagePath!,
+            Left = leftPos,
+            Top = topPos,
+            Width = boundingBoxWidth,
+            Height = boundingBoxHeight,
+            Rotation = IsPlacementHorizontal ? 90.0 : 0.0 
+        });
 
         SelectedPlacementShip.IsPlaced = true;
         SelectedPlacementShip = PlacementShips.FirstOrDefault(s => !s.IsPlaced);

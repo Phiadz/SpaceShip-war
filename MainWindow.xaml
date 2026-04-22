@@ -101,61 +101,77 @@
                 <StackPanel Grid.Column="1" Margin="0,0,14,0">
                     <TextBlock FontWeight="SemiBold" Text="Local Board (10x10)" />
                     
-                    <Border Margin="0,8,0,0" CornerRadius="6" Padding="4" BorderBrush="#51657A" BorderThickness="2">
+                    <Border Margin="0,8,0,0" CornerRadius="6" Padding="4" BorderBrush="#51657A" BorderThickness="2"
+                            Width="432" Height="432" HorizontalAlignment="Left" VerticalAlignment="Top">
                         <Border.Background>
-                            <ImageBrush ImageSource="pack://siteoforigin:,,,/Assets/space_breaker_asset/Background/stars_texture.png" Stretch="UniformToFill" Opacity="0.9" />
+                            <ImageBrush ImageSource="pack://siteoforigin:,,,/Assets/space_breaker_asset/Background/stars_texture.png" Stretch="Uniform" Opacity="0.9" />
                         </Border.Background>
                         
-                        <Grid Margin="2" Width="320" Height="320" HorizontalAlignment="Center" VerticalAlignment="Center">
-        
-                        <ItemsControl ItemsSource="{Binding VisualPlacedShips}" IsHitTestVisible="False">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <Canvas />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemContainerStyle>
-                                <Style TargetType="ContentPresenter">
-                                    <Setter Property="Canvas.Left" Value="{Binding Left}" />
-                                    <Setter Property="Canvas.Top" Value="{Binding Top}" />
-                                </Style>
-                            </ItemsControl.ItemContainerStyle>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Image Source="{Binding ImagePath}" Width="{Binding Width}" Height="{Binding Height}" Stretch="Fill">
-                                        <Image.LayoutTransform>
-                                            <RotateTransform Angle="{Binding Rotation}" />
-                                        </Image.LayoutTransform>
-                                    </Image>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <Grid Margin="2" Width="420" Height="420" HorizontalAlignment="Center" VerticalAlignment="Center">
+    
+                            <ItemsControl ItemsSource="{Binding LocalBoardCells}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="10" Rows="10" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Width="40" Height="40" Margin="1" Padding="0"
+                                                AllowDrop="True" DragOver="BoardCell_DragOver" Drop="BoardCell_Drop"
+                                                Command="{Binding CellCommand}" Background="{Binding CellBrush}"
+                                                BorderBrush="#1D2430" BorderThickness="1">
+                                            </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
 
-                        <ItemsControl ItemsSource="{Binding LocalBoardCells}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid Columns="10" Rows="10" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Width="30" Height="30" Margin="1" Padding="0"
-                                            AllowDrop="True" DragOver="BoardCell_DragOver" Drop="BoardCell_Drop"
-                                            Command="{Binding CellCommand}" Background="{Binding CellBrush}"
-                                            BorderBrush="#1D2430" BorderThickness="1">
-                                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" Text="{Binding Marker}" />
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        
-                    </Grid> 
+                            <ItemsControl ItemsSource="{Binding VisualPlacedShips}" IsHitTestVisible="False">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Canvas.Left" Value="{Binding Left}" />
+                                        <Setter Property="Canvas.Top" Value="{Binding Top}" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding ImagePath}" Width="{Binding Width}" Height="{Binding Height}" Stretch="Fill">
+                                            <Image.LayoutTransform>
+                                                <RotateTransform Angle="{Binding Rotation}" />
+                                            </Image.LayoutTransform>
+                                        </Image>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <ItemsControl ItemsSource="{Binding LocalBoardCells}" IsHitTestVisible="False">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="10" Rows="10" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Width="40" Height="40" Margin="1">
+                                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" Text="{Binding Marker}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                        </Grid>
                     </Border>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2">
                     <TextBlock FontWeight="SemiBold" Text="Enemy Board (Click To Fire)" />
-                    <Border Margin="0,8,0,0" BorderThickness="2" CornerRadius="4">
+                    <Border Margin="0,8,0,0" BorderThickness="2" CornerRadius="4" 
+                            Width="432" Height="432" HorizontalAlignment="Left" VerticalAlignment="Top">                  
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="BorderBrush" Value="#51657A" />
@@ -166,27 +182,32 @@
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
+                        
                         <Border.Background>
                             <ImageBrush ImageSource="pack://siteoforigin:,,,/Assets/space_breaker_asset/Background/star2jpg.jpg" Stretch="UniformToFill" Opacity="0.9" />
                         </Border.Background>
-                        <ItemsControl Margin="2" Width="320" Height="320" HorizontalAlignment="Center" VerticalAlignment="Center" ItemsSource="{Binding EnemyBoardCells}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="10" Rows="10" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
+                        
+                        <ItemsControl Margin="2" Width="420" Height="420" HorizontalAlignment="Center" VerticalAlignment="Center" ItemsSource="{Binding EnemyBoardCells}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="10" Rows="10" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Width="30"
-                                            Height="30"
-                                            Margin="1"
-                                            Padding="0"
-                                            Command="{Binding CellCommand}"
-                                            Background="{Binding CellBrush}"
-                                            BorderBrush="#1D2430"
-                                            BorderThickness="1">
-                                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" Text="{Binding Marker}" />
-                                    </Button>
+                                    <Grid Width="40" Height="40" Margin="1">
+                                        <Rectangle Fill="#3C6496" Opacity="0.4" />
+                                        <Button Padding="0"
+                                                AllowDrop="True"
+                                                DragOver="BoardCell_DragOver"
+                                                Drop="BoardCell_Drop"
+                                                Command="{Binding CellCommand}"
+                                                Background="{Binding CellBrush}"
+                                                BorderBrush="#1D2430"
+                                                BorderThickness="1">
+                                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" Text="{Binding Marker}" />
+                                        </Button>
+                                    </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
