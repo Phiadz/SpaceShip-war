@@ -49,6 +49,8 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     private readonly SampleGameCombatStateAdapter _combatAdapter;
     private readonly Random _random = new();
     private readonly List<HashSet<(int X, int Y)>> _placedShips = new();
+    private readonly Dictionary<(int X, int Y), string> _placedShipNameByCell = new();
+    private readonly Dictionary<string, string> _shipAssetPathByName = new(StringComparer.OrdinalIgnoreCase);
 
     private string _hostIp = "127.0.0.1";
     private int _hostPort = 5050;
@@ -138,6 +140,7 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     public AsyncRelayCommand StopAllCommand { get; }
     public RelayCommand RotatePlacementCommand { get; }
     public RelayCommand ResetPlacementCommand { get; }
+    public ObservableCollection<VisualPlacedShipViewModel> VisualPlacedShips { get; } = new();
 
     public string HostIp
     {
@@ -234,6 +237,41 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
 
     public bool IsPlacementComplete => PlacementShips.All(s => s.IsPlaced);
 
+    public bool CanDragShip(string shipName)
+    {
+        if (string.IsNullOrWhiteSpace(shipName))
+        {
+            return false;
+        }
+
+        return CanEditPlacement() && PlacementShips.Any(s => string.Equals(s.Name, shipName, StringComparison.OrdinalIgnoreCase) && !s.IsPlaced);
+    }
+
+    public bool TryPlaceShipByNameAt(string shipName, int startX, int startY)
+    {
+        if (string.IsNullOrWhiteSpace(shipName))
+        {
+            return false;
+        }
+
+        var ship = PlacementShips.FirstOrDefault(s => string.Equals(s.Name, shipName, StringComparison.OrdinalIgnoreCase));
+        if (ship is null)
+        {
+            LastEvent = $"Unknown ship: {shipName}.";
+            return false;
+        }
+
+        if (ship.IsPlaced)
+        {
+            LastEvent = $"{ship.Name} is already placed.";
+            return false;
+        }
+
+        SelectedPlacementShip = ship;
+        PlaceSelectedShip(startX, startY);
+        return ship.IsPlaced;
+    }
+
     private bool CanConfirmReady()
     {
         return !_isBusy &&
@@ -297,8 +335,14 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
         var fullPath = Path.Combine(new[] { AppContext.BaseDirectory }.Concat(pathParts).ToArray());
         if (File.Exists(fullPath))
         {
+            _shipAssetPathByName[name] = fullPath;
             FleetAssets.Add(new FleetAssetViewModel(name, fullPath));
         }
+    }
+
+    private string? TryGetShipAssetPath(string shipName)
+    {
+        return _shipAssetPathByName.TryGetValue(shipName, out var path) ? path : null;
     }
 
     private async Task OnLocalCellPlacementAsync(BoardCellViewModel cell)
@@ -341,12 +385,29 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
             return;
         }
 
+        var shipName = SelectedPlacementShip.Name;
+        var shipImagePath = TryGetShipAssetPath(shipName);
         var shipSet = new HashSet<(int X, int Y)>(candidateCells);
         _placedShips.Add(shipSet);
         foreach (var pos in shipSet)
         {
-            LocalBoardCells.First(c => c.X == pos.X && c.Y == pos.Y).SetLocalShipPresent(true);
+            _placedShipNameByCell[pos] = shipName;
+            LocalBoardCells.First(c => c.X == pos.X && c.Y == pos.Y).SetLocalShipPresent(true, shipImagePath);
         }
+        double cellTotalSize = 32.0; 
+    double shipWidth = 30.0;
+    double shipHeight = (SelectedPlacementShip.Length * cellTotalSize) - 2.0;
+
+    VisualPlacedShips.Add(new VisualPlacedShipViewModel
+    {
+        ImagePath = shipImagePath!,
+        Left = startX * cellTotalSize + 1.0, 
+        Top = startY * cellTotalSize + 1.0,
+        Width = shipWidth,
+        Height = shipHeight,
+        // Hình tàu mặc định hướng lên (0 độ). Nếu đặt ngang, xoay 90 độ.
+        Rotation = IsPlacementHorizontal ? 90.0 : 0.0 
+    });
 
         SelectedPlacementShip.IsPlaced = true;
         SelectedPlacementShip = PlacementShips.FirstOrDefault(s => !s.IsPlaced);
@@ -388,6 +449,8 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     private void ResetPlacement()
     {
         _placedShips.Clear();
+        _placedShipNameByCell.Clear();
+        VisualPlacedShips.Clear();
 
         foreach (var ship in PlacementShips)
         {
@@ -430,7 +493,7 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     {
         await RunBusyAsync(async () =>
         {
-            await PrepareFreshMatchStateAsync();
+            await PrepareMatchStateForConnectionAsync();
             LastEvent = "Host listening...";
             await _networkManager.StartHostAsync(HostPort);
         });
@@ -440,7 +503,7 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     {
         await RunBusyAsync(async () =>
         {
-            await PrepareFreshMatchStateAsync();
+            await PrepareMatchStateForConnectionAsync();
             LastEvent = $"Connecting to {HostIp}:{HostPort}...";
             await _networkManager.ConnectToHostAsync(HostIp, HostPort);
         });
@@ -524,6 +587,22 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
         IsMyTurn = false;
     }
 
+    private async Task PrepareMatchStateForConnectionAsync()
+    {
+        await _sessionCoordinator.ResetSessionAsync();
+        _combatAdapter.ResetForNewMatch();
+        ResetEnemyBoardForNewMatch();
+        RepaintLocalBoardFromPlacement();
+
+        GameResult = "In Progress";
+        SessionStatus = SessionPhase.Placement.ToString();
+        TurnHint = "Placement phase: choose ship, rotate, then click local board.";
+        IsMyTurn = false;
+        RefreshLocalBoardClickability();
+        RefreshEnemyBoardClickability();
+        ConfirmReadyCommand.NotifyCanExecuteChanged();
+    }
+
     private void ResetBoardsForNewMatch()
     {
         foreach (var cell in LocalBoardCells)
@@ -537,6 +616,37 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
             // Dung lai API reset mau/marker de xoa dau vet hit/miss cua tran cu.
             cell.SetLocalShipPresent(false);
             cell.SetEnemyClickable(false);
+        }
+    }
+
+    private void ResetEnemyBoardForNewMatch()
+    {
+        foreach (var cell in EnemyBoardCells)
+        {
+            cell.SetLocalShipPresent(false);
+            cell.SetEnemyClickable(false);
+        }
+    }
+
+    private void RepaintLocalBoardFromPlacement()
+    {
+        var placedCells = _placedShips.SelectMany(s => s).ToHashSet();
+
+        foreach (var cell in LocalBoardCells)
+        {
+            var coordinate = (cell.X, cell.Y);
+            if (placedCells.Contains(coordinate))
+            {
+                _placedShipNameByCell.TryGetValue(coordinate, out var shipName);
+                var imagePath = shipName is null ? null : TryGetShipAssetPath(shipName);
+                cell.SetLocalShipPresent(true, imagePath);
+            }
+            else
+            {
+                cell.SetLocalShipPresent(false);
+            }
+
+            cell.SetClickable(false);
         }
     }
 

@@ -174,3 +174,27 @@ Error  : A Task's exception(s) were not observed either by Waiting on the Task o
 Stack  :
 <no stack trace>
 
+========================================
+Time   : 2026-04-21 23:23:21.072 +07:00
+Source : TaskSchedulerUnobservedTaskException
+Type   : System.AggregateException
+Error  : A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (No connection could be made because the target machine actively refused it.)
+Stack  :
+<no stack trace>
+
+========================================
+Time   : 2026-04-22 12:56:12.921 +07:00
+Source : TaskSchedulerUnobservedTaskException
+Type   : System.AggregateException
+Error  : A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Unable to read data from the transport connection: The I/O operation has been aborted because of either a thread exit or an application request..)
+Stack  :
+<no stack trace>
+
+========================================
+Time   : 2026-04-22 12:56:19.065 +07:00
+Source : TaskSchedulerUnobservedTaskException
+Type   : System.AggregateException
+Error  : A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Unable to read data from the transport connection: The I/O operation has been aborted because of either a thread exit or an application request..)
+Stack  :
+<no stack trace>
+

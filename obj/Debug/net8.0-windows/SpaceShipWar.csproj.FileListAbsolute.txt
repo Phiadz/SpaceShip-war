@@ -98,3 +98,4 @@ D:\C_Project\Battleship 2d game\SpaceShip-war\bin\Debug\net8.0-windows\Assets\sp
 D:\C_Project\Battleship 2d game\SpaceShip-war\bin\Debug\net8.0-windows\Assets\space_breaker_asset\Weapons\Small\Plasma\turret_04_mk3.png
 D:\C_Project\Battleship 2d game\SpaceShip-war\bin\Debug\net8.0-windows\Assets\space_breaker_asset\Weapons\Small\turret_small_32x32.png
 D:\C_Project\Battleship 2d game\SpaceShip-war\obj\Debug\net8.0-windows\App.baml
+D:\C_Project\Battleship 2d game\SpaceShip-war\bin\Debug\net8.0-windows\Assets\space_breaker_asset\Background\star2jpg.jpg
