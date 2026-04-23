@@ -171,7 +171,7 @@ Lý do chọn text protocol:
 
 ## 9. 📊 Trạng thái hiện tại - Phase 1 HOÀN THÀNH
 
-### Economy System (NEW) ✅
+### Economy System (NEW) 
 - **PlayerEconomy class**: Manage credits (initial: 100 CR), track Spent/Remaining
 - **ShopItem class**: Dynamic ImagePath property cho runtime asset resolution
 - **WeaponCatalog**: 7+ items (Laser, Plasma, Shield, Cannon, Missile, Drone, Turret)
@@ -182,40 +182,40 @@ Lý do chọn text protocol:
 - **Commands**: BuyItemCommand (AsyncRelayCommand<T>), SelectShopItemCommand, InspectShipCommand
 - **Value Converters**: EquippedToOpacityConverter, NullToVisibilityConverter
 
-### Networking Layer ✅
+### Networking Layer 
 - TCP Manager: Kết nối bất đồng bộ, retry, timeout, auto-reconnect
 - UDP Discovery: Host announcement, LAN client discovery
 - Protocol: Text-based parser (READY|1, FIRE|x|y, RESULT|x|y|outcome, END|WIN/LOSE)
 - Event system: Dispatcher-safe callbacks
 - Resilience: Retry backoff, timeout handling, auto-reconnect
 
-### Game Session Layer ✅
+### Game Session Layer 
 - Phase management: Placement → AwaitingReady → Combat → Finished
 - Turn-based logic: Local + remote turn tracking
 - Session reset: Full state cleanup
 - Message orchestration: READY sync → Combat → END
 
-### Domain/Board Layer ✅
+### Domain/Board Layer 
 - Hit/Miss/Sunk resolution, enemy shadow board, local board tracking
 
-### Presentation Layer ✅
+### Presentation Layer 
 - MainGameViewModel: Full orchestration + economy integration
 - InventoryItemViewModel (NEW), EquippedWeaponViewModel (NEW)
 - AsyncRelayCommand<T> (NEW) for parameterized commands
 - 10 ViewModel classes + 4 Command classes + 2 Converters
 - Status: connection, phase, turn, budget, last event, game result
 
-### Infrastructure ✅
+### Infrastructure 
 - Asset loading: Runtime path resolution
 - run-two-instances.ps1: Fresh rebuild + dual-instance
 - Dispatcher integration, asset auto-copy
 
-### Test & Validation ✅
+### Test & Validation 
 - End-to-end Placement → Combat
 - Reconnect scenarios
 - **NEW**: Economy flow (buy, budget, inventory)
 
-## 10. 🚀 Chuẩn bị cho mở rộng Phase 2
+## 10. Chuẩn bị cho mở rộng Phase 2
 
 ### Shipment & Sync với Network
 - Gửi **LOADOUT** message kèm Inventory state lúc ConfirmReady
@@ -238,7 +238,7 @@ Lý do chọn text protocol:
 - `LOADOUT|ship|weaponIds` (sync loadout at READY)
 - `UPGRADE|ship|weaponId` (announce buy in-combat)
 
-## 11. 📂 Cấu trúc Project (cập nhật)
+## 11. Cấu trúc Project
 
 **Source/Game/Economy/** (NEW Phase 1)
 - PlayerEconomy.cs, ShopItem.cs, BudgetRules.cs, ShipLoadout.cs, WeaponCatalog.cs
@@ -257,7 +257,7 @@ Lý do chọn text protocol:
 - Double-click binding cho Shop items
 - Single-click binding cho preview
 
-## 12. 👥 Tác giả và mục đích
+## 12. Tác giả và mục đích
 
 Dự án phục vụ học tập và trình bày năng lực:
 
