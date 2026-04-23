@@ -28,6 +28,21 @@ public interface IGameProtocol
     string BuildEnd(bool isWinner);
 
     /// <summary>
+    /// Dong goi message CREDITS de bao cong tien.
+    /// </summary>
+    string BuildCredits(int amount);
+
+    /// <summary>
+    /// Dong goi message LOADOUT de chot danh sach vu khi.
+    /// </summary>
+    string BuildLoadout(string loadoutDataPayload);
+
+    /// <summary>
+    /// Dong goi message ECONOMY de dong bo vi tien.
+    /// </summary>
+    string BuildEconomy(int credits, int spent);
+
+    /// <summary>
     /// Thu parse chuoi thuan TCP thanh GameMessage co kieu du lieu ro rang.
     /// </summary>
     bool TryParse(string rawMessage, out GameMessage? parsedMessage);

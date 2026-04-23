@@ -38,6 +38,22 @@ public sealed class GameProtocol : IGameProtocol
     public string BuildEnd(bool isWinner) => $"END|{(isWinner ? "WIN" : "LOSE")}";
 
     /// <summary>
+    /// Tao message CREDITS de bao cong tien.
+    /// </summary>
+    public string BuildCredits(int amount) => $"CREDITS|{amount}";
+
+    /// <summary>
+    /// Tao message LOADOUT de chot danh sach vu khi.
+    /// Format: LOADOUT|Carrier|1001,1002|Destroyer|1003
+    /// </summary>
+    public string BuildLoadout(string loadoutDataPayload) => $"LOADOUT|{loadoutDataPayload}";
+
+    /// <summary>
+    /// Tao message ECONOMY de dong bo vi tien.
+    /// </summary>
+    public string BuildEconomy(int credits, int spent) => $"ECONOMY|{credits}|{spent}";
+    
+    /// <summary>
     /// Parse message tu dang text sang object co kieu.
     /// Ham khong nem exception de receive loop an toan; chi tra ve false neu message sai.
     /// </summary>
@@ -60,6 +76,8 @@ public sealed class GameProtocol : IGameProtocol
 
         switch (command)
         {
+            // Các message có format đơn giản, có thể parse trực tiếp
+            // Ví dụ: READY|1 hoặc READY|0
             case "READY":
                 if (parts.Length != 2 || !TryParseBool01(parts[1], out var ready))
                 {
@@ -68,7 +86,8 @@ public sealed class GameProtocol : IGameProtocol
 
                 parsedMessage = new GameMessage(GameMessageType.Ready, ready: ready, raw: rawMessage);
                 return true;
-
+            // Các message có format phức tạp hơn, cần parse nhiều trường hợp lệ
+            // Ví dụ: FIRE|3|5 hoặc RESULT|3|5|HIT
             case "FIRE":
                 if (parts.Length != 3 || !TryParseCoordinate(parts[1], parts[2], out var fx, out var fy))
                 {
@@ -91,7 +110,8 @@ public sealed class GameProtocol : IGameProtocol
 
                 parsedMessage = new GameMessage(GameMessageType.Result, x: rx, y: ry, outcome: outcome, raw: rawMessage);
                 return true;
-
+            // Các message có format đặc biệt, khó parse theo trường hợp cụ thể, ta sẽ lưu nguyên chuỗi raw để xử lý sau
+            // Ví dụ: END|WIN hoặc END|LOSE
             case "END":
                 if (parts.Length != 2)
                 {
@@ -113,7 +133,28 @@ public sealed class GameProtocol : IGameProtocol
 
                 parsedMessage = new GameMessage(GameMessageType.End, winner: isWinner.Value, raw: rawMessage);
                 return true;
+            
+            case "CREDITS":
+                // Ví dụ: CREDITS|10
+                if (parts.Length != 2 || !int.TryParse(parts[1], out var credits))
+                {
+                    return false;
+                }
+                parsedMessage = new GameMessage(GameMessageType.Credits, creditsAmount: credits, raw: rawMessage);
+                return true;
 
+            case "LOADOUT":
+                // Ví dụ: LOADOUT|Carrier|1001,1002|Destroyer|1003
+                if (parts.Length < 2) return false;
+                // Vì danh sách vũ khí có thể dài, ta lấy luôn chuỗi nguyên bản (rawMessage)
+                parsedMessage = new GameMessage(GameMessageType.Loadout, loadoutData: rawMessage, raw: rawMessage);
+                return true;
+
+            case "ECONOMY":
+                // Ví dụ: ECONOMY|100|20|80
+                if (parts.Length < 2) return false;
+                parsedMessage = new GameMessage(GameMessageType.Economy, economyData: rawMessage, raw: rawMessage);
+                return true;
             default:
                 parsedMessage = new GameMessage(GameMessageType.Unknown, raw: rawMessage);
                 return true;
