@@ -172,8 +172,6 @@ Lý do chọn text protocol:
 - Placement → Combat → End-to-end flow testable
 - Reconnect scenario testable (Stop/Start)
 
----
-
 ## 10. Chuẩn bị cho mở rộng Phase 2
 
 ### Economy System (Chưa có)
@@ -204,8 +202,6 @@ Lý do chọn text protocol:
 - Loadout panel: tàu + weapon đã gắn
 - Reward screen: show điểm earned
 - Economy dashboard: total credits, spent, remaining
-
----
 
 ## 11. Tác giả và mục đích
 
