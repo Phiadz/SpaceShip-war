@@ -174,34 +174,23 @@ Lý do chọn text protocol:
 
 ## 10. Chuẩn bị cho mở rộng Phase 2
 
-### Economy System (Chưa có)
+### Economy System
 - PlayerEconomy model (Credits, RoundIncome, Spent)
-- Score calculation (Miss=0, Hit=+10, Sunk=+25, Win bonus=+50)
-- Credit accumulation per turn/round
+- Tích lũy tiền ngay trong Combat (Hit=+10, Sunk=+25)
 
-### Shop + Loadout System (Chưa có)
-- ShopItem model (Id, Name, Cost, Category, AssetPath, MaxPerMatch)
-- ShipLoadout model (ShipName + weapon list)
-- BudgetRules (StartBudget, MaxPerShip, MaxPerMatch)
-- OwnedUpgrade tracking
-- WeaponCatalog mapping
+### Flexible Shop + Hardpoint Loadout System (Cơ chế mới)
+- **Offline Prep:** Cho phép mua sắm và gắn vũ khí vào tàu ngay từ màn hình chính (Placement phase) trước cả khi Host/Connect.
+- **In-Combat Upgrades:** Cho phép mở Shop nâng cấp vũ khí hoặc mua Support ngay trong giai đoạn Combat.
+- **Visual Hardpoints:** Tàu có các "lỗ" (Hardpoints) kích thước Small/Medium/Heavy. Giao diện WPF sẽ vẽ đè (overlay) ảnh vũ khí (weapon_base) lên đúng tọa độ Hardpoint của tàu.
 
-### Protocol Extension (Chưa có)
-- CREDITS|amount (update credit sau mỗi shot)
-- LOADOUT|shipName|weaponIds (sync loadout trước Combat)
-- ECONOMY|credits|spent (economy state sync)
+### Protocol Extension
+- `CREDITS|amount` (đồng bộ tiền cày được sau mỗi shot)
+- `LOADOUT|shipName|weaponIds` (Gửi toàn bộ Loadout kèm theo lúc bấm READY)
+- `UPGRADE|shipName|weaponId` (Gửi thông báo khi đối thủ mua đồ nâng cấp giữa trận Combat)
 
-### Session Phase Extension (Chưa có)
-- PreBattleBuy phase (mua vật phẩm)
-- LoadoutAssign phase (gắn weapon vào tàu)
-- PostMatchRewards phase (tính điểm + bonus)
-
-### UI Panels (Chưa có)
-- Shop panel: item list + Buy button + cost display
-- Budget indicator: RemainingBudget bar
-- Loadout panel: tàu + weapon đã gắn
-- Reward screen: show điểm earned
-- Economy dashboard: total credits, spent, remaining
+### UI Panels
+- Shop panel: Tích hợp ngay bên trái, có thể toggle (bật/tắt) lúc đặt tàu hoặc lúc đang đánh.
+- Budget indicator: Thanh tiền Remaining hiển thị liên tục.
 
 ## 11. Tác giả và mục đích
 

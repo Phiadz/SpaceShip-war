@@ -18,7 +18,7 @@ public static class WeaponCatalog
             Name = "Small Laser Cannon", 
             Cost = 20, 
             Category = "Weapon",
-            AssetPathParts = new[] { AssetsRoot, AssetPackFolder, WeaponsFolder, "Small", "turret_02_mk1.png" },
+            AssetPathParts = new[] { AssetsRoot, AssetPackFolder, WeaponsFolder, "Small", "Laser", "turret_02_mk1.png" },
             Description = "A small but highly precise weapon that fires concentrated laser beams with moderate damage and high accuracy. Effective against small, agile targets but less effective against heavily armored ships, can be blocked by shields",
             AllowedShipSizes = new[] { ShipSize.Small, ShipSize.Medium }
         },
@@ -68,7 +68,7 @@ public static class WeaponCatalog
             Name = "Repair Drone Bay",
             Cost = 40,
             Category = "Support",
-            AssetPathParts = new[] { AssetsRoot, AssetPackFolder, "Others", "Drone", "turret_03_mk3.png" },
+            AssetPathParts = new[] { AssetsRoot, AssetPackFolder, "Others", "Drone", "bottom_01_stay.png" },
             Description = "Automated repair system that deploys drones to repair 1x1 tiles on the ship and other ships, can be targeted and destroyed by enemy fire, but can provide crucial repairs during battle if protected, effective for keeping larger ships in the fight longer, but requires careful positioning and protection to be effective",
             AllowedShipSizes = new[] { ShipSize.Big }
         },

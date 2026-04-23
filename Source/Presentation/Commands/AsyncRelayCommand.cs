@@ -7,6 +7,8 @@ namespace Battleship2D.Presentation.Commands;
 
 /// <summary>
 /// Command bat dong bo cho WPF, tranh block UI thread khi goi network/service.
+/// Khac voi RelayCommand thong thuong, AsyncRelayCommand se tu dong khoa command trong luc dang chay va mo khoa khi xong, tranh viec goi nhieu
+/// dành cho các nút bấm không cần truyền dữ liệu như nút Start Host, Connect
 /// </summary>
 public sealed class AsyncRelayCommand : ICommand
 {

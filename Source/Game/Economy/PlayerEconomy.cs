@@ -13,6 +13,11 @@ public class PlayerEconomy
     //remaining credits available for the player to spend, calculated as total credits minus spent amount
     public int Remaining => Credits - Spent;
     //constructor to initialize the player's economy with a starting budget
+    public PlayerEconomy(int startBudget = 100)
+    {
+        Credits = startBudget;
+        Spent = 0;
+    }
     public void AddCredit(int amount)
     {
         if (amount < 0) throw new ArgumentException("Credits cannot be negative");

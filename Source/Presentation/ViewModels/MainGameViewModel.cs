@@ -65,6 +65,8 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     private bool _isBusy;
     private bool _isPlacementHorizontal = true;
     private PlacementShipViewModel? _selectedPlacementShip;
+    //Data cho inspector
+    private VisualPlacedShipViewModel? _selectedInspectorShip;
 
     public MainGameViewModel(
         INetworkManager networkManager,
@@ -97,7 +99,15 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
         StopAllCommand = new AsyncRelayCommand(StopAllAsync, () => !_isBusy);
         RotatePlacementCommand = new RelayCommand(RotatePlacement, CanEditPlacement);
         ResetPlacementCommand = new RelayCommand(ResetPlacement, CanEditPlacement);
+        BuyItemCommand = new AsyncRelayCommand<Battleship2D.Game.Economy.ShopItem?>(BuyItemAsync);
+        InspectShipCommand = new AsyncRelayCommand<FleetAssetViewModel?>(InspectShipAsync);
+        SelectShopItemCommand = new AsyncRelayCommand<Battleship2D.Game.Economy.ShopItem?>(item => 
+        {
+            SelectedShopItem = item;
+            return Task.CompletedTask;
+        });
 
+        OnPropertyChanged(nameof(CurrentBudget));
         BuildBoards();
         LoadFleetAssets();
         InitializePlacementShips();
@@ -130,7 +140,6 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     public ObservableCollection<BoardCellViewModel> EnemyBoardCells { get; } = new();
     public ObservableCollection<FleetAssetViewModel> FleetAssets { get; } = new();
     public ObservableCollection<PlacementShipViewModel> PlacementShips { get; } = new();
-
     public AsyncRelayCommand StartHostCommand { get; }
     public AsyncRelayCommand ConnectCommand { get; }
     public AsyncRelayCommand StartDiscoveryListenCommand { get; }
@@ -141,6 +150,29 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
     public RelayCommand RotatePlacementCommand { get; }
     public RelayCommand ResetPlacementCommand { get; }
     public ObservableCollection<VisualPlacedShipViewModel> VisualPlacedShips { get; } = new();
+    //data cho shop và inventory
+    public ObservableCollection<InventoryItemViewModel> Inventory { get; } = new();
+    // Khởi tạo ví tiền
+    private readonly Battleship2D.Game.Economy.PlayerEconomy _economy = new();
+    // Đổ dữ liệu súng từ Catalog ra cửa hàng
+    public ObservableCollection<Battleship2D.Game.Economy.ShopItem> ShopItems { get; } = new(Battleship2D.Game.Economy.WeaponCatalog.Weapons);
+    // Tính toán số ngân sách còn lại để hiển thị lên màn hình
+    public int CurrentBudget => _economy.Remaining;
+    // Lệnh mua đồ (Double Click)
+    public AsyncRelayCommand<Battleship2D.Game.Economy.ShopItem?> BuyItemCommand { get; }
+    // TLệnh khi click vào tàu để soi trong Inspector
+    public AsyncRelayCommand<FleetAssetViewModel?> InspectShipCommand { get; }
+
+    // Khai báo biến lưu món hàng đang được click chọn
+    private Battleship2D.Game.Economy.ShopItem? _selectedShopItem;
+    public Battleship2D.Game.Economy.ShopItem? SelectedShopItem
+    {
+        get => _selectedShopItem;
+        set => SetProperty(ref _selectedShopItem, value);
+    }
+    
+    // Lệnh xem thông số (Click 1 lần)
+    public AsyncRelayCommand<Battleship2D.Game.Economy.ShopItem?> SelectShopItemCommand { get; }
 
     public string HostIp
     {
@@ -196,6 +228,11 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
         private set => SetProperty(ref _gameResult, value);
     }
 
+    public VisualPlacedShipViewModel? SelectedInspectorShip
+    {
+        get => _selectedInspectorShip;
+        set => SetProperty(ref _selectedInspectorShip, value);
+    }
     public bool IsMyTurn
     {
         get => _isMyTurn;
@@ -436,6 +473,7 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
             leftPos -= centerOffset;
         }
 
+
         VisualPlacedShips.Add(new VisualPlacedShipViewModel
         {
             ImagePath = shipImagePath!,
@@ -445,6 +483,35 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
             Height = boundingBoxHeight,
             Rotation = IsPlacementHorizontal ? 90.0 : 0.0 
         });
+
+        var visualShip = new VisualPlacedShipViewModel
+        {
+            ImagePath = shipImagePath!,
+            Left = leftPos,
+            Top = topPos,
+            Width = boundingBoxWidth,
+            Height = boundingBoxHeight,
+            Rotation = IsPlacementHorizontal ? 90.0 : 0.0 
+        };
+
+        // --- TEST BƯỚC 4: GẮN THỬ 1 Ụ SÚNG VÀO GIỮA THÂN TÀU ---
+        double weaponSize = 30.0; // Kích thước nòng súng (30x30 pixel)
+        
+        // Đường dẫn tới ảnh súng (nhớ kiểm tra đúng đường dẫn file của bạn)
+        string testWeaponPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "space_breaker_asset", "Weapons", "Medium", "Cannon", "turret_01_mk1.png");
+        
+        visualShip.EquippedWeapons.Add(new EquippedWeaponViewModel
+        {
+            ImagePath = testWeaponPath,
+            Left = (boundingBoxWidth - weaponSize) / 2.0, // Canh giữa theo chiều ngang của tàu
+            Top = 20.0, // Đặt cách mép mũi tàu 20 pixel (bạn có thể tự chỉnh số này cho vừa mắt)
+            Width = weaponSize,
+            Height = weaponSize
+        });
+        // --------------------------------------------------------
+
+        // 2. Add tàu (lúc này đã cõng theo súng) vào danh sách hiển thị
+        VisualPlacedShips.Add(visualShip);
 
         SelectedPlacementShip.IsPlaced = true;
         SelectedPlacementShip = PlacementShips.FirstOrDefault(s => !s.IsPlaced);
@@ -575,6 +642,16 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
             }
 
             _combatAdapter.ApplyCustomFleet(_placedShips.Select(s => (IReadOnlyCollection<(int X, int Y)>)s).ToList());
+            
+            // --- THÊM LOGIC LOADOUT Ở ĐÂY ---
+            // TODO (Sẽ hoàn thiện ở Bước 4): Lấy danh sách vũ khí đã gắn từ các tàu
+            string myLoadoutData = "Carrier:1001,1002|Destroyer:1003"; // Chuỗi giả lập tạm thời
+            
+            // 1. Gửi Loadout sang cho địch trước khi Ready
+            // Dùng new GameProtocol() để tránh lỗi nếu _sessionCoordinator chưa expose Protocol
+            await _networkManager.SendMessageAsync(new Battleship2D.Networking.Protocol.GameProtocol().BuildLoadout(myLoadoutData));
+            
+            // 2. Mới gửi lệnh Ready
             await _sessionCoordinator.ConfirmReadyAsync();
             LastEvent = "READY sent. Waiting opponent...";
             TurnHint = "Waiting both players READY...";
@@ -702,6 +779,34 @@ public sealed class MainGameViewModel : ObservableObject, IAsyncDisposable
         {
             SetBusy(false);
         }
+    }
+    // Lệnh mua đồ (Double Click)
+        private async Task BuyItemAsync(Battleship2D.Game.Economy.ShopItem? item)
+    {
+        if (item == null || !_economy.CanSpend(item.Cost)) return;
+
+        await RunBusyAsync(async () => {
+            _economy.Spend(item.Cost);
+            Inventory.Add(new InventoryItemViewModel { Item = item, IsEquipped = false });
+            OnPropertyChanged(nameof(CurrentBudget));
+            LastEvent = $"Purchased {item.Name} for {item.Cost} credits.";
+        });
+    }
+    // Lệnh khi click vào tàu để soi trong Inspector
+    private Task InspectShipAsync(FleetAssetViewModel? asset)
+    {
+        if (asset != null)
+        {
+            // Khi click vào tàu bên trái, tạo một bản sao phóng to để soi trong Khung Xanh Lá
+            SelectedInspectorShip = new VisualPlacedShipViewModel
+            {
+                ImagePath = asset.ImagePath,
+                Width = 140, // Kích thước phóng to để preview
+                Height = 280,
+                Rotation = 0
+            };
+        }
+        return Task.CompletedTask;
     }
 
     private void SetBusy(bool isBusy)

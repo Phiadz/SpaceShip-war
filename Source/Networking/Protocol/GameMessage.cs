@@ -1,32 +1,45 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Battleship2D.Networking.Protocol;
 
 /// <summary>
 /// Dai dien mot message da parse tu chuoi TCP.
 /// Cac truong khong lien quan voi tung loai message co the null.
 /// </summary>
-[SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "Protocol DTO needs multiple optional parsed fields.")]
-public sealed class GameMessage(
-    GameMessageType type,
-    int? x = null,
-    int? y = null,
-    ShotOutcome? outcome = null,
-    bool? ready = null,
-    bool? winner = null,
-    string? raw = null,
-    int? creditsAmount = null,
-    string? loadoutData = null,
-    string? economyData = null)
+public sealed class GameMessage
 {
-    public GameMessageType Type { get; } = type;
-    public int? X { get; } = x;
-    public int? Y { get; } = y;
-    public ShotOutcome? Outcome { get; } = outcome;
-    public bool? Ready { get; } = ready;
-    public bool? Winner { get; } = winner;
-    public string? Raw { get; } = raw;
-    public int? CreditsAmount { get; } = creditsAmount;
-    public string? LoadoutData { get; } = loadoutData;
-    public string? EconomyData { get; } = economyData;
+    public GameMessage(
+        GameMessageType type,
+        int? x = null,
+        int? y = null,
+        ShotOutcome? outcome = null,
+        bool? ready = null,
+        bool? winner = null,
+        string? raw = null,
+        int? creditsAmount = null,
+        string? loadoutData = null,
+        string? economyData = null
+        )
+    
+    {
+        Type = type;
+        X = x;
+        Y = y;
+        Outcome = outcome;
+        Ready = ready;
+        Winner = winner;
+        Raw = raw;
+        CreditsAmount = creditsAmount;
+        LoadoutData = loadoutData;
+        EconomyData = economyData;
+    }
+
+    public GameMessageType Type { get; }
+    public int? X { get; }
+    public int? Y { get; }
+    public ShotOutcome? Outcome { get; }
+    public bool? Ready { get; }
+    public bool? Winner { get; }
+    public string? Raw { get; }
+    public int? CreditsAmount { get; }
+    public string? LoadoutData { get; }
+    public string? EconomyData { get; }
 }

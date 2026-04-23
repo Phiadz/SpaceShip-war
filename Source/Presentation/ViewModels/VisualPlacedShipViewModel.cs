@@ -6,6 +6,7 @@ tự code tay một class ObservableObject riêng bằng các thư viện tiêu 
 Vì class ObservableObject của bạn dùng hàm SetProperty để thông báo cho giao diện WPF biết khi nào dữ liệu thay đổi, 
 nên file VisualPlacedShipViewModel.cs mới sẽ cần được viết theo đúng cấu trúc (pattern) đó thay vì dùng auto-property (như { get; set; }).
 */ 
+using System.Collections.ObjectModel;
 public class VisualPlacedShipViewModel : ObservableObject
 {
     private string _imagePath = string.Empty;
@@ -50,4 +51,6 @@ public class VisualPlacedShipViewModel : ObservableObject
         get => _rotation;
         set => SetProperty(ref _rotation, value);
     }
+    //Danh sách các ụ súng được gắn trên con tàu này, mỗi ụ súng sẽ có vị trí (Left, Top) và kích thước (Width, Height) riêng biệt so với con tàu.
+    public ObservableCollection<EquippedWeaponViewModel> EquippedWeapons { get; } = new();
 }
