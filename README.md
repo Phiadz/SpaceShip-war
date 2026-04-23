@@ -169,7 +169,7 @@ Lý do chọn text protocol:
 - Đến lượt thì bắn vào tọa độ đối thủ
 - Theo dõi status và event log trên UI
 
-## 9. 📊 Trạng thái hiện tại - Phase 1 HOÀN THÀNH
+## 9. Trạng thái hiện tại
 
 ### Economy System (NEW) 
 - **PlayerEconomy class**: Manage credits (initial: 100 CR), track Spent/Remaining
