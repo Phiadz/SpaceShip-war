@@ -47,7 +47,7 @@ Project được tách thành các tầng rõ ràng:
 
 ```text
 SpaceShip-war/
-├─ Assets/                                # Pixel-art assets
+├─ Assets/                                # Pixel-art assets by [Zintoki](https://zintoki.itch.io/space-breaker)
 ├─ Source/
 │  ├─ Game/
 │  │  ├─ Board/
@@ -131,23 +131,91 @@ Lý do chọn text protocol:
 - Đến lượt thì bắn vào tọa độ đối thủ
 - Theo dõi status và event log trên UI
 
-## 9. Trạng thái hiện tại của repository
+## 9. Trạng thái hiện tại - ĐÃ HOÀN THÀNH
 
-Repository hiện chứa source modules theo kiến trúc OOP và XAML/ViewModel mẫu cho networking flow.
-Nếu bạn muốn chạy thành executable đầy đủ, hãy tích hợp các module trong solution WPF chính của bạn (MainWindow/App startup) và map board UI theo gameplay logic.
+### Networking Layer
+- TCP Manager: Kết nối bất đồng bộ, retry với backoff, timeout, auto-reconnect
+- UDP Discovery: Host announcement, client discovery trong LAN
+- Protocol: Text-based message parser (READY|1, FIRE|x|y, RESULT|x|y|outcome, END|WIN/LOSE)
+- Event system: Tất cả callback được marshal qua Dispatcher (UI-safe)
+- Resilience: ConnectTimeout, RetryCount, SendTimeout, AutoReconnect policy
 
-## 10. Định hướng mở rộng
+### Game Session Layer
+- Phase management: Placement → AwaitingReady → Combat → Finished
+- Turn-based logic: Local turn + remote turn tracking
+- Session reset: Full state cleanup (board, ready flags, turn)
+- Message orchestration: READY sync → Combat logic → END resolution
 
-1. Thêm board UI interactive 10x10 (drag/drop fleet placement).
-2. Thêm save/load state và reconnect resume game.
-3. Thêm unit test cho protocol parser và session coordinator.
-4. Thêm security layer (validation/chống packet giả).
+### Domain/Board Layer
+- SampleGameCombatStateAdapter: Hit/Miss/Sunk resolution
+- Enemy shadow board: Tracking kết quả bản gửi đi
+- Local board: Hit tracking, sunk detection
+- Board validation: Coordinate bounds checking
+
+### Presentation Layer
+- MainGameViewModel: Orchestrating tất cả service layers
+- BoardCellViewModel: 10x10 grid cells (local + enemy)
+- FleetAssetViewModel: 6 ships hiển thị (Carrier, Destroyer, Cruiser, Frigate, Scout, Battleship)
+- DiscoveredHostViewModel: Host discovery list binding
+- Commands: AsyncRelayCommand cho Start Host, Connect, Ready, Fire, Stop All
+- Status display: Connection state, session phase, turn indicator
+
+### Infrastructure
+- ShipCatalog: Centralized config (name, length, asset path)
+- Asset loading: Runtime path resolution từ bin/net8.0-windows/Assets
+- run-two-instances.ps1: Fresh rebuild + dual-instance launcher
+- .csproj: Assets auto-copy to output (PreserveNewest)
+- Dispatcher integration: All events posted safely to UI thread
+
+### Test & Validation
+- 2-instance demo script
+- Placement → Combat → End-to-end flow testable
+- Reconnect scenario testable (Stop/Start)
+
+---
+
+## 10. Chuẩn bị cho mở rộng Phase 2
+
+### Economy System (Chưa có)
+- PlayerEconomy model (Credits, RoundIncome, Spent)
+- Score calculation (Miss=0, Hit=+10, Sunk=+25, Win bonus=+50)
+- Credit accumulation per turn/round
+
+### Shop + Loadout System (Chưa có)
+- ShopItem model (Id, Name, Cost, Category, AssetPath, MaxPerMatch)
+- ShipLoadout model (ShipName + weapon list)
+- BudgetRules (StartBudget, MaxPerShip, MaxPerMatch)
+- OwnedUpgrade tracking
+- WeaponCatalog mapping
+
+### Protocol Extension (Chưa có)
+- CREDITS|amount (update credit sau mỗi shot)
+- LOADOUT|shipName|weaponIds (sync loadout trước Combat)
+- ECONOMY|credits|spent (economy state sync)
+
+### Session Phase Extension (Chưa có)
+- PreBattleBuy phase (mua vật phẩm)
+- LoadoutAssign phase (gắn weapon vào tàu)
+- PostMatchRewards phase (tính điểm + bonus)
+
+### UI Panels (Chưa có)
+- Shop panel: item list + Buy button + cost display
+- Budget indicator: RemainingBudget bar
+- Loadout panel: tàu + weapon đã gắn
+- Reward screen: show điểm earned
+- Economy dashboard: total credits, spent, remaining
+
+---
 
 ## 11. Tác giả và mục đích
 
 Dự án phục vụ học tập và trình bày năng lực:
 
-- Kiến trúc phân tầng OOP
-- Network programming trong C#
-- Xử lý bất đồng bộ và đồng bộ UI WPF
-- Thiết kế game turn-based P2P
+- **Kiến trúc phân tầng OOP**: Presentation → Session → Networking → Domain
+- **Network programming**: TCP (reliable gameplay), UDP (discovery)
+- **Async/await pattern**: UI responsive khi I/O blocking
+- **Dispatcher marshaling**: UI-safe event handling từ worker threads
+- **Turn-based game design**: P2P state sync, phase management
+- **MVVM + WPF**: Command binding, observable properties
+- **Testability**: Interface-driven design (mock-friendly)
+- **Scalability**: Easy to extend (economy, shop, persistence)
